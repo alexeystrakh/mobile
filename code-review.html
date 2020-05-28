@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Code Review</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* basic style */
+    body {
+      font-family: Helvetica;
+    }
+    h1 {
+      font-size: 24px;
+    }
+    h2 {
+      font-size: 20px;
+    }
+    h3 {
+      font-size: 16px;
+    },
+    p {
+      white-space: pre-wrap;
+    }
+
+    /* links in headlines */
+    h2 > a {
+      color: green;
+      text-decoration: none;
+    }
+    h2 > a:hover {
+      text-decoration: underline;
+    }
+    h3.lines-headline {
+      color: #005bbb;
+      padding-left: 5px;
+      margin-bottom: 5px;
+    }
+
+    /* table style */
+    table.review-table {
+      font-size: 14px;
+      padding-left: 10px;
+    }
+    table.review-table .caption {
+      font-weight: bold;
+      vertical-align: top;
+    }
+    table.review-table tr > td:first-child {
+      width: 120px
+    }
+
+    /* priority indicator */
+    .text > span:before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+      margin-left: -15px;
+    }
+    .text > span.prio-high:before {
+      background: #FF4500;
+    }
+    .text > span.prio-medium:before {
+      background: #FFD700;
+    }
+    .text > span.prio-low:before {
+      background: #9ACD32;
+    }
+    .text > span.prio-none:before {
+      background: #D3D3D3;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="main-headline">BitWarden - MobCAT Code Review</h1>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/App/Pages/Settings/ExportVaultPageViewModel.cs#L106">/src/App/Pages/Settings/ExportVaultPageViewModel.cs</a>
+    </h2>
+    <h3 class="lines-headline">Position: 106:20-106:73</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-high">high</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[Threading] Avoid Task.Result usage </td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>Avoid Task.Result usage in application in apps with the UI thread, this can cause deadlocks, await a task instead.</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/Core/Services/ApiService.cs#L416-L417">/src/Core/Services/ApiService.cs</a>
+    </h2>
+    <h3 class="lines-headline">Position: 416:0-417:88</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-medium">medium</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[Performance] Data deserialization/decryption is happening on the UI thread</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>Result of http requests is processed on UI thread (awaited), parsed (json) or even decrypted. This pattern affects performance because the actual data processing is happening on the calling thread and in most cases it&#x27;s the UI thread. The issue found in a few places: ApiService.cs#L407, AuditService.cs#L36, CipherService#L610,L792.</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+    <h3 class="lines-headline">Position: 138:0-138:0</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-low">low</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[Maintainability] Error handling issues (empty catch, rethrow)</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>In some places we found empty catches, which is a significant maintainability issue, there is no visibility is any error happen, empty catch found in a few places: Attachment.cs#L55, AuthService.cs#L312, MobilePlatformUtilsService#L236. Also in some places re-throw logic doesn&#x27;t supply an original error details which leads to a missing stack trace ApiService.cs#L138. In case of re-throwing error as is, no need to specify a variable name, this will help to keep the original error stack trace AuthService.cs#L236</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/Core/Services/BroadcasterService.cs#L22">/src/Core/Services/BroadcasterService.cs</a>
+    </h2>
+    <h3 class="lines-headline">Position: 22:24-22:73</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-low">low</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[Architecture] Messenger pub/sub pattern increases complexity</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>BroadcasterService generates a thread for every subscriber on every message send, this could generate lots of threads. Moreover there is no error handling in case if subscriber failed. This will also can lead to a race conditions. I would recommend to use sequential subscribers calls with proper error handling and use just a single thread to send a message. I would also avoid using Pub/Sub pattern to decrease complexity and make it easier to debug/maintain. As instead, introduce services and inject them where needed via interfaces to be called.</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/Core/Services/LockService.cs#L152">/src/Core/Services/LockService.cs</a>
+    </h2>
+    <h3 class="lines-headline">Position: 152:12-152:70</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-low">low</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[Threading] Return task without async/await</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>Return a Task directly without async/await when no Task result processing is required. It will reduce overhead related to restoring the execution context.</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/Core/Services/PclCryptoFunctionService.cs#L215-L218">/src/Core/Services/PclCryptoFunctionService.cs</a>
+    </h2>
+    <h3 class="lines-headline">Position: 215:0-218:69</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-low">low</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[Performance] Manual string processing affects memory and performance</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>Work with strings using Regex (preferred) or StringBuilder instead of sequenced string. Replace to optimize memory management and performance.</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/App/Pages/Vault/GroupingsPage/GroupingsPage.xaml.cs#L100">/src/App/Pages/Vault/GroupingsPage/GroupingsPage.xaml.cs</a>
+    </h2>
+    <h3 class="lines-headline">Position: 100:28-100:55</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-low">low</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[Threading] Not awaited task execution</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>An asynchronous method which returns a task is called without await and without subsequent task processing which can lead to silent errors and unpredictable app behavior.</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+    <h3 class="lines-headline">Position: 108:15-127:17</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-low">low</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[Maintainability] Custom retry logic with magic numbers in code </td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>Retry data loading in catch make it more complex to support and edit retry logic. It&#x27;s better to use a retry framework to do this kind of tasks (e.g. Polly).</p>
+        </td>
+      </tr>
+      <tr class="row-additional">
+        <td class="caption">Additional Info</td>
+        <td class="text"><a href="https://alastaircrabtree.com/implementing-the-retry-pattern-using-polly">https://alastaircrabtree.com/implementing-the-retry-pattern-using-polly</a></td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/App/Pages/BaseViewModel.cs#L16">/src/App/Pages/BaseViewModel.cs</a>
+    </h2>
+    <h3 class="lines-headline">Position: 16:0-16:45</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-low">low</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[XF] BaseViewModel depends on XF PageContent</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>ViewModel has direct reference to Page (PageContent). ViewModels shouldn&#x27;t know anything about XF or page. All the required XF functionality should be injected with IoC and services. A good practice is to move View Models to a project which doesn’t depends on XF package to make sure no dependencies will be added in future, it helps to avoid coupling, improves testability and maintainability of the ViewModels code</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/App/Pages/Vault/GroupingsPage/GroupingsPage.xaml#L92-L132">/src/App/Pages/Vault/GroupingsPage/GroupingsPage.xaml</a>
+    </h2>
+    <h3 class="lines-headline">Position: 92:16-132:44</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-high">high</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[XF] Switch from ListView to CollectionView</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>XF is going to improve CollectionView going forward. This is now the main control to render collection of elements, highly optimized for the best performance. Also the ListView control affects the memory performance because of recently discovered memory leak confirmed in this app. The ListView control will be supported but it&#x27;s recommended to switch to the CollectionView as better alternative.</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+    <h3 class="lines-headline">Position: 1:0-10:28</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-medium">medium</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[XF] Apply Xamarin.Forms best practices for high performance layouts</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>Most of the items are already addressed in the code, want to outline the list here to make sure every item is taken into account: xaml compiler, compiled bindings, less bindings, fast renderers, startup tracing, layout compression, optimized layout, optimized images, shallow visual tree</p>
+        </td>
+      </tr>
+      <tr class="row-additional">
+        <td class="caption">Additional Info</td>
+        <td class="text"><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/deploy-test/performance">https://docs.microsoft.com/en-us/xamarin/xamarin-forms/deploy-test/performance</a></td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/App/Controls/MiButton.cs#L12-L17">/src/App/Controls/MiButton.cs</a>
+    </h2>
+    <h3 class="lines-headline">Position: 12:0-17:26</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-low">low</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[XF] Controls customization with styles is more flexible than with custom classes</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>Material, Mono, FontAwesome buttons and labels controls are introduced into the code base to support custom fonts. It&#x27;s better (easer and more flexible, maintainable) to use styles, changed dynamically with a theme.</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/App/Controls/RepeaterView.cs#L7">/src/App/Controls/RepeaterView.cs</a>
+    </h2>
+    <h3 class="lines-headline">Position: 7:4-7:43</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-low">low</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[XF] Replace RepeaterView with ItemsSource/ItemTemplate</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>RepeaterView is a custom StackLayout with ItemsSource/ItemTemplate properties. It’s supported by XF with attached properties ItemsSource/ItemsTemplate. Please also consider using CollectionView whenever you have unpredictable number of items to ensure the best possible experience.</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/iOS.Extension/MainInterface.storyboard">/src/iOS.Extension/MainInterface.storyboard</a>
+    </h2>
+    <h3 class="lines-headline">Position: </h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-medium">medium</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[XF] Use Xamarin.Forms in iOS extension projects</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>Lots of existing XF pages where re-implemented in iOS extensions natively. There is a way to reuse existing logic in the iOS extensions as well.</p>
+        </td>
+      </tr>
+      <tr class="row-additional">
+        <td class="caption">Additional Info</td>
+        <td class="text"><a href="https://docs.microsoft.com/en-us/xamarin/ios/platform/extensions-with-xamarinforms">https://docs.microsoft.com/en-us/xamarin/ios/platform/extensions-with-xamarinforms</a></td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/App/App.xaml.cs#L44-L154">/src/App/App.xaml.cs</a>
+    </h2>
+    <h3 class="lines-headline">Position: 44:0-154:0</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-low">low</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[Performance] Heavy app startup</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>This constructor will directly affect app startup performance before the app is interactive. It&#x27;s better to keep this method as simple as possible and offload all the logic for later.</p>
+        </td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+  <section class="file-section">
+    <h2 class="file-section-headline">
+      <a href="https://github.com/bitwarden/mobile/tree/master/src/App/Pages/Vault/AttachmentsPage.xaml#L30-L96">/src/App/Pages/Vault/AttachmentsPage.xaml</a>
+    </h2>
+    <h3 class="lines-headline">Position: 30:1-96:17</h3>
+    <table class="review-table">
+      <tr class="row-priority">
+        <td class="caption">Priority</td>
+        <td class="text">
+          <span class="prio-high">high</span>
+        </td>
+      </tr>
+      <tr class="row-title">
+        <td class="caption">Title</td>
+        <td class="text">[XF] Multiple nested layouts decrease performance</td>
+      </tr>
+      <tr class="row-description">
+        <td class="caption">Description</td>
+        <td class="text">
+          <p>Avoid creating multiple nested layouts, use shallow layout instead: AddEditPage.xaml#L56 (nesting level 4), AttachmentsPage.xaml#L30 (nesting level 6), ScanPage.xaml#L16. Items layout especially affects the performance - AutofillCiphersPage.xaml#L66, especially in repeater as long as items are not recycled - CollectionsPage.xaml#L38, SharePage.xaml#L65</p>
+        </td>
+      </tr>
+      <tr class="row-additional">
+        <td class="caption">Additional Info</td>
+        <td class="text"><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/deploy-test/performance#optimize-layout-performance">https://docs.microsoft.com/en-us/xamarin/xamarin-forms/deploy-test/performance#optimize-layout-performance</a></td>
+      </tr>
+      <tr class="row-sha">
+        <td class="caption">SHA</td>
+        <td class="text">cd3585be58672aa646fd3293ccfc051c6fe29a53</td>
+      </tr>
+    </table>
+  </section>
+</body>
+</html>
